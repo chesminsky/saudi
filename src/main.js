@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     var chart = new Highcharts.mapChart('container', {
-        series: window.customMap ,
+        series: window.customMap,
 
         plotOptions: {
             map: {
@@ -9,7 +9,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     pointFormat: '{point.name}'
                 }
             },
+            series: {
+                point: {
+                    events: {
+                        click: function () {
+                            console.log(this.name);
+                        }
+                    }
+                }
+            }
         },
-     });
+    });
 });
 
