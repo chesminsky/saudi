@@ -1,6 +1,11 @@
+const { Highcharts } = (<any>window);
+import series from './map';
+
+console.log(series);
+
 document.addEventListener('DOMContentLoaded', function () {
     var chart = new Highcharts.mapChart('container', {
-        series: window.customMap,
+        series,
 
         plotOptions: {
             map: {

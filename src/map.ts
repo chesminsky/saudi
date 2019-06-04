@@ -1,4 +1,4 @@
-window.customMap = [
+export default [
 	{
 		"type": "map",
 		"data": [
