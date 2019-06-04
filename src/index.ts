@@ -1,5 +1,6 @@
 const { Highcharts } = (<any>window);
 import series from './map.json';
+import data from '../data/output.json';
 
 document.addEventListener('DOMContentLoaded', function () {
     var chart = new Highcharts.mapChart('container', {
@@ -16,7 +17,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 point: {
                     events: {
                         click: function () {
-                            console.log(this.name);
+                            const found = (<any>data).find((item: any) => {
+                               return item.governorate.replace(/\W+/g, '') === this.name.replace(/\W+/g, '');
+                            });
+
+                            if (found) {
+                                render(found);
+                            } else {
+                                clear();
+                            }
                         }
                     }
                 }
@@ -25,3 +34,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function clear() {
+    document.getElementById('table').innerHTML = 'no data';
+}
+
+function render(found: any) {
+    document.getElementById('table').innerHTML = getTableRows(found);
+}
+
+function getTableRows(found: any) {
+    return Object.keys(found).map((key) => {
+        return `<tr><td>${key}</td><td>${found[key]}</td></tr>`
+    }).join('');
+}
