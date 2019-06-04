@@ -1,7 +1,5 @@
 const { Highcharts } = (<any>window);
-import series from './map';
-
-console.log(series);
+import series from './map.json';
 
 document.addEventListener('DOMContentLoaded', function () {
     var chart = new Highcharts.mapChart('container', {
