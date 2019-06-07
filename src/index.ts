@@ -32,6 +32,7 @@ class SaudiMap extends HTMLElement {
 
     data: Array<DataRow>;
     series: Array<MapSerie>;
+    groupedData: { [key: string]: Array<DataRow>}
     groupedSeries: Array<MapSerie>;
 
     constructor() {
@@ -44,17 +45,17 @@ class SaudiMap extends HTMLElement {
     connectedCallback() {
         this.innerHTML = this.template;
 
-        const groupedData = groupBy(this.data, 'region');
+        this.groupedData = groupBy(this.data, 'region');
 
-        this.groupedSeries = Object.keys(groupedData).map((region: string) => {
+        this.groupedSeries = Object.keys(this.groupedData).map((region: string) => {
             return 	{
                 type: 'map',
-                data: groupedData[region].map((d: DataRow) => {
+                data: this.groupedData[region].map((d: DataRow) => {
                     return this.findInMap(d.governorate);
                 }).filter((d) => Boolean(d))
             }
         });
-        console.log(groupedData);
+        console.log(this.groupedData);
         console.log(this.groupedSeries);
 
         this.initChart();
@@ -92,6 +93,10 @@ class SaudiMap extends HTMLElement {
             title: { text: 'Saudi Arabia' },
             series: (<any>this.groupedSeries),
 
+            colors: Object.keys(this.groupedData).map((region) => {
+                return `rgba(100,149,237, ${self.getRegionValue('number_of_people', region) / self.getMaximumValue('number_of_people')})`;
+            }),
+
             plotOptions: {
                 map: {
                     tooltip: {
@@ -100,6 +105,7 @@ class SaudiMap extends HTMLElement {
                     }
                 },
                 series: {
+                    borderWidth: 0,
                     point: {
                         events: {
                             click: function () {
@@ -148,6 +154,26 @@ class SaudiMap extends HTMLElement {
                 <table id="table" class="table"></table>
             </div>
         `;
+    }
+
+
+    // --- data calculations ---
+
+    getRegionValue(param: string, region: string): number {
+        return this.groupedData[region].reduce((acc: number, curr: DataRow) => acc += this.parseNumber(curr[param]), 0)
+    }
+
+    getMaximumValue(param: string): number {
+        const byRegions =  Object.keys(this.groupedData).map((region) => this.getRegionValue(param, region));
+        return Math.max.apply(Math, byRegions);
+    }
+
+    // -- utils --
+    parseNumber(number: string) {
+        if (number === '') {
+            return 0;
+        }
+        return parseFloat(number.replace(/,/g, ''));
     }
 }
 
