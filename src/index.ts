@@ -2,48 +2,84 @@ const { Highcharts } = (<any>window);
 import series from './map.json';
 import data from '../data/output.json';
 
-document.addEventListener('DOMContentLoaded', function () {
-    var chart = new Highcharts.mapChart('container', {
-        series,
+class SaudiMap extends HTMLElement {
 
-        plotOptions: {
-            map: {
-                tooltip: {
-                    headerFormat: '',
-                    pointFormat: '{point.name}'
-                }
-            },
-            series: {
-                point: {
-                    events: {
-                        click: function () {
-                            const found = (<any>data).find((item: any) => {
-                               return item.governorate.replace(/\W+/g, '') === this.name.replace(/\W+/g, '');
-                            });
+    constructor() {
+        super();
+    }
 
-                            if (found) {
-                                render(found);
-                            } else {
-                                clear();
+    connectedCallback() {
+        this.innerHTML = this.template;
+        this.initChart();
+    }
+
+    initChart() {
+        const self = this;
+        Highcharts.mapChart('container', {
+            series,
+
+            plotOptions: {
+                map: {
+                    tooltip: {
+                        headerFormat: '',
+                        pointFormat: '{point.name}'
+                    }
+                },
+                series: {
+                    point: {
+                        events: {
+                            click: function () {
+                                const found = (<any>data).find((item: any) => {
+                                    const regex = /\W|_+/g
+                                    const dataName = item.governorate.replace(regex, '');
+                                    const mapName = this.name.replace(regex, '');
+                                    console.log(dataName, ' | ', mapName);
+                                    return mapName.includes(dataName);
+                                });
+
+                                if (found) {
+                                    self.render(found);
+                                } else {
+                                    self.clear();
+                                }
                             }
                         }
                     }
                 }
-            }
-        },
-    });
-});
+            },
+        });
+    }
 
-function clear() {
-    document.getElementById('table').innerHTML = 'no data';
+    clear() {
+        this.querySelector('#table').innerHTML = 'no data';
+    }
+
+    render(found: any) {
+        this.querySelector('#table').innerHTML = this.getTableRows(found);
+    }
+
+    getTableRows(found: any) {
+        return Object.keys(found).map((key) => {
+            return `<tr><td>${key}</td><td>${found[key]}</td></tr>`
+        }).join('');
+    }
+
+    get template() {
+        return `
+            <style>
+                #container {
+                    height:600px;
+                }
+                .table {
+                    table-layout: fixed;
+                }
+            </style>
+            <div class="container">
+                <div id="container"></div>
+                <table id="table" class="table"></table>
+            </div>
+        `;
+    }
 }
 
-function render(found: any) {
-    document.getElementById('table').innerHTML = getTableRows(found);
-}
-
-function getTableRows(found: any) {
-    return Object.keys(found).map((key) => {
-        return `<tr><td>${key}</td><td>${found[key]}</td></tr>`
-    }).join('');
-}
+customElements.define('saudi-map', SaudiMap);
