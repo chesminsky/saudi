@@ -1,6 +1,7 @@
 import * as Highcharts from 'highcharts/highmaps';
 import series from './map.json';
 import data from '../data/output.json';
+import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
 
 interface DataRow {
@@ -36,7 +37,7 @@ class SaudiMap extends HTMLElement {
     constructor() {
         super();
 
-        this.data = data;
+        this.data = data.concat(nodata);
         this.series = series;
     }
 
@@ -53,7 +54,7 @@ class SaudiMap extends HTMLElement {
                 }).filter((d) => Boolean(d))
             }
         });
-
+        console.log(groupedData);
         console.log(this.groupedSeries);
 
         this.initChart();
@@ -166,10 +167,10 @@ class SaudiMap extends HTMLElement {
         return `
             <style>
                 #container {
-                    height:600px;
+                    height:1000px;
                 }
                 #container2 {
-                    height:600px;
+                    height:1000px;
                 }
                 .table {
                     table-layout: fixed;
