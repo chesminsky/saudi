@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "highcharts": "^7.1.2",
     "xlsx-to-json": "^0.3.0"
   },
   "devDependencies": {

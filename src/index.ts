@@ -1,4 +1,4 @@
-const { Highcharts } = (<any>window);
+import * as Highcharts from 'highcharts/highmaps';
 import series from './map.json';
 import data from '../data/output.json';
 
@@ -16,7 +16,8 @@ class SaudiMap extends HTMLElement {
     initChart() {
         const self = this;
         Highcharts.mapChart('container', {
-            series,
+            title: { text: 'Saudi Arabia' },
+            series: (<any>series),
 
             plotOptions: {
                 map: {
