@@ -116,38 +116,7 @@ class SaudiMap extends HTMLElement {
                 }
             },
         });
-
-        Highcharts.mapChart('container2', {
-            title: { text: 'Saudi Arabia' },
-            series: (<any>this.series),
-
-            plotOptions: {
-                map: {
-                    tooltip: {
-                        headerFormat: '',
-                        pointFormat: '{point.name}'
-                    }
-                },
-                series: {
-                    point: {
-                        events: {
-                            click: function () {
-                                const found = self.findInTable(this.name);
-
-                                if (found) {
-                                    self.render(found);
-                                } else {
-                                    self.clear();
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-        });
     }
-
-
 
     clear() {
         this.querySelector('#table').innerHTML = 'no data';
@@ -167,10 +136,7 @@ class SaudiMap extends HTMLElement {
         return `
             <style>
                 #container {
-                    height:1000px;
-                }
-                #container2 {
-                    height:1000px;
+                    height:600px;
                 }
                 .table {
                     table-layout: fixed;

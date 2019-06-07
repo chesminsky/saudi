@@ -118,6 +118,66 @@
         "population_with_alternate_means_of_service": "",
         "population_supplied_with_tankers_within_administrative_area": "",
         "population_supplied_with_standpipes_within_administrative_area": ""
+    },
+    {
+        "id_on_map": "",
+        "region": "Asir",
+        "governorate": "ID_011",
+        "number_of_people": "",
+        "number_of_households": "",
+        "number_of_connections": "",
+        "population_off_grid": "",
+        "population_with_alternate_means_of_service": "",
+        "population_supplied_with_tankers_within_administrative_area": "",
+        "population_supplied_with_standpipes_within_administrative_area": ""
+    },
+    {
+        "id_on_map": "",
+        "region": "Asir",
+        "governorate": "ID_009",
+        "number_of_people": "",
+        "number_of_households": "",
+        "number_of_connections": "",
+        "population_off_grid": "",
+        "population_with_alternate_means_of_service": "",
+        "population_supplied_with_tankers_within_administrative_area": "",
+        "population_supplied_with_standpipes_within_administrative_area": ""
+    },
+    {
+        "id_on_map": "",
+        "region": "Jizan",
+        "governorate": "ID_012",
+        "number_of_people": "",
+        "number_of_households": "",
+        "number_of_connections": "",
+        "population_off_grid": "",
+        "population_with_alternate_means_of_service": "",
+        "population_supplied_with_tankers_within_administrative_area": "",
+        "population_supplied_with_standpipes_within_administrative_area": ""
+    },
+    {
+        "id_on_map": "",
+        "region": "Asir",
+        "governorate": "ID_008",
+        "number_of_people": "",
+        "number_of_households": "",
+        "number_of_connections": "",
+        "population_off_grid": "",
+        "population_with_alternate_means_of_service": "",
+        "population_supplied_with_tankers_within_administrative_area": "",
+        "population_supplied_with_standpipes_within_administrative_area": ""
+    },
+    {
+        "id_on_map": "",
+        "region": "Asir",
+        "governorate": "ID_010",
+        "number_of_people": "",
+        "number_of_households": "",
+        "number_of_connections": "",
+        "population_off_grid": "",
+        "population_with_alternate_means_of_service": "",
+        "population_supplied_with_tankers_within_administrative_area": "",
+        "population_supplied_with_standpipes_within_administrative_area": ""
     }
 ]
 
