@@ -21,6 +21,7 @@ interface DataRow {
 interface MapSerie {
     type: string;
     data: Array<MapSerieItem>;
+    name?: string;
 }
 
 interface MapSerieItem {
@@ -50,6 +51,7 @@ class SaudiMap extends HTMLElement {
         this.groupedSeries = Object.keys(this.groupedData).map((region: string) => {
             return 	{
                 type: 'map',
+                name: region,
                 data: this.groupedData[region].map((d: DataRow) => {
                     return this.findInMap(d.governorate);
                 }).filter((d) => Boolean(d))
@@ -97,6 +99,9 @@ class SaudiMap extends HTMLElement {
                 return `rgba(100,149,237, ${self.getRegionValue('number_of_people', region) / self.getMaximumValue('number_of_people')})`;
             }),
 
+            chart: {
+                backgroundColor: '#fafafa'
+            },
             plotOptions: {
                 map: {
                     tooltip: {
