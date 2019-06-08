@@ -27,6 +27,7 @@ interface MapSerie {
 interface MapSerieItem {
     name: string;
     path: string;
+    region?: string;
 }
 
 class SaudiMap extends HTMLElement {
@@ -35,10 +36,11 @@ class SaudiMap extends HTMLElement {
     series: Array<MapSerie>;
     groupedData: { [key: string]: Array<DataRow>}
     groupedSeries: Array<MapSerie>;
+    mode: 'region' | 'governorate';
 
     constructor() {
         super();
-
+        this.mode = 'region';
         this.data = data.concat(nodata);
         this.series = series;
     }
@@ -53,7 +55,11 @@ class SaudiMap extends HTMLElement {
                 type: 'map',
                 name: region,
                 data: this.groupedData[region].map((d: DataRow) => {
-                    return this.findInMap(d.governorate);
+                    const item = this.findInMap(d.governorate);
+                    if (item) {
+                        Object.assign(item, { region });
+                    }
+                    return item;
                 }).filter((d) => Boolean(d))
             }
         });
@@ -106,10 +112,15 @@ class SaudiMap extends HTMLElement {
                 map: {
                     tooltip: {
                         headerFormat: '',
-                        pointFormat: '{point.name}'
+                        pointFormat: this.mode === 'region' ? '{point.region}' : '{point.name}'
                     }
                 },
-                series: {
+                series: { 
+                    states: {
+                        hover: {
+                            enabled: false
+                        },
+                    },
                     borderWidth: 0,
                     point: {
                         events: {
