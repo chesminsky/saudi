@@ -32,7 +32,7 @@ interface MapSerieItem {
 }
 
 class SaudiMap extends HTMLElement {
-    map: any;
+    map: Highcharts.Chart;
     data: Array<DataRow>;
     series: Array<MapSerie>;
     groupedData: { [key: string]: Array<DataRow>}
@@ -132,7 +132,7 @@ class SaudiMap extends HTMLElement {
                     borderWidth: 0,
                     point: {
                         events: {
-                            click: function () {
+                            click: function (e) {
                                 const found = self.findInTable(this.name);
 
                                 if (found) {
@@ -140,11 +140,25 @@ class SaudiMap extends HTMLElement {
                                 } else {
                                     self.clear();
                                 }
+                                self.hideOtherSeries(this.region);
+                                // self.map.mapZoom(0.7, self.map.xAxis[0].toValue(e.chartX), self.map.yAxis[0].toValue(e.y));
                             }
                         }
                     }
                 }
             },
+        });
+    }
+
+    showAllSeries() {
+        this.map.series.forEach((s) => s.show());
+    }
+
+    hideOtherSeries(region: string) {
+        this.map.series.forEach((s) => {
+            if (s.name !== region) {
+                s.hide();
+            }
         });
     }
 
