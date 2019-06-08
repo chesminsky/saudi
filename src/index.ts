@@ -3,6 +3,7 @@ import series from './map.json';
 import data from '../data/output.json';
 import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
+import capitalize from 'lodash/capitalize';
 
 interface DataRow {
     governorate: string;
@@ -31,18 +32,26 @@ interface MapSerieItem {
 }
 
 class SaudiMap extends HTMLElement {
-
+    map: any;
     data: Array<DataRow>;
     series: Array<MapSerie>;
     groupedData: { [key: string]: Array<DataRow>}
     groupedSeries: Array<MapSerie>;
     mode: 'region' | 'governorate';
+    filter: 'number_of_connections' |
+            'number_of_households' |
+            'number_of_people' |
+            'population_off_grid' |
+            'population_supplied_with_standpipes_within_administrative_area' |
+            'population_supplied_with_tankers_within_administrative_area' |
+            'population_with_alternate_means_of_service'
 
     constructor() {
         super();
         this.mode = 'region';
         this.data = data.concat(nodata);
         this.series = series;
+        this.filter = 'number_of_connections';
     }
 
     connectedCallback() {
@@ -67,6 +76,7 @@ class SaudiMap extends HTMLElement {
         console.log(this.groupedSeries);
 
         this.initChart();
+        this.events();
     }
 
     /**
@@ -97,13 +107,11 @@ class SaudiMap extends HTMLElement {
 
     initChart() {
         const self = this;
-        Highcharts.mapChart('container', {
+        this.map = Highcharts.mapChart(<HTMLElement>(this.querySelector('.map')), {
             title: { text: 'Saudi Arabia' },
             series: (<any>this.groupedSeries),
 
-            colors: Object.keys(this.groupedData).map((region) => {
-                return `rgba(100,149,237, ${self.getRegionValue('number_of_people', region) / self.getMaximumValue('number_of_people')})`;
-            }),
+            colors: this.colorize(),
 
             chart: {
                 backgroundColor: '#fafafa'
@@ -141,37 +149,88 @@ class SaudiMap extends HTMLElement {
     }
 
     clear() {
-        this.querySelector('#table').innerHTML = 'no data';
+        this.querySelector('.table').innerHTML = 'no data';
     }
 
     render(found: DataRow) {
-        this.querySelector('#table').innerHTML = this.getTableRows(found);
+        this.querySelector('.table').innerHTML = this.getTableRows(found);
     }
 
     getTableRows(found: DataRow) {
         return Object.keys(found).map((key: string) => {
-            return `<tr><td>${key}</td><td>${found[key]}</td></tr>`
+            if (key !== 'id_on_map') {
+                return `<tr><td>${this.formatCode(key)}</td><td>${found[key]}</td></tr>`
+            } else {
+                return '';
+            }
         }).join('');
     }
 
+    get options() {
+        return [
+            'number_of_connections',
+            'number_of_households',
+            'number_of_people',
+            'population_off_grid',
+            'population_supplied_with_standpipes_within_administrative_area',
+            'population_supplied_with_tankers_within_administrative_area',
+            'population_with_alternate_means_of_service'
+        ]
+    }
+
     get template() {
+
         return `
             <style>
-                #container {
+                .map {
                     height:600px;
+                }
+                .container {   
+                    position: relative;
                 }
                 .table {
                     table-layout: fixed;
                 }
+                .select {
+                    position: absolute;
+                    top: 6px;
+                    width: 300px;
+                    left: 20px;
+                    z-index: 1;
+                }
             </style>
             <div class="container">
-                <div id="container"></div>
-                <div id="container2"></div>
-                <table id="table" class="table"></table>
+                <select class="select">
+                    ${ this.options.map((o) => `<option value="${o}">${this.formatCode(o)}</option>`) }
+                </select>
+                <div class="map"></div>
+                <table class="table"></table>
             </div>
         `;
     }
 
+    events() {
+        this.querySelector('.select').addEventListener('change', (e: any) => {
+            this.filter = e.target.value;
+            this.updateMap();
+        });
+    }
+
+    updateMap() {
+        this.map.update({
+            colors: this.colorize()
+        })
+    }
+
+    colorize() {
+        return Object.keys(this.groupedData).map((region) => {
+            const value = this.getRegionValue(this.filter, region);
+            const maxValue = this.getMaximumValue(this.filter);
+            console.log(value);
+            console.log(maxValue);
+            return `rgba(100,149,237, ${ value/maxValue })`;
+        });
+    }
 
     // --- data calculations ---
 
@@ -186,10 +245,14 @@ class SaudiMap extends HTMLElement {
 
     // -- utils --
     parseNumber(number: string) {
-        if (number === '') {
+        if (number === '' || number === '-') {
             return 0;
         }
-        return parseFloat(number.replace(/,/g, ''));
+        return parseFloat(number.replace(/\W|_|,+/g, ''));
+    }
+
+    formatCode(c: string) {
+        return capitalize(c.replace(/_+/g, ' '));
     }
 }
 
