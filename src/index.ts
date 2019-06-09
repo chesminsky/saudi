@@ -94,8 +94,15 @@ class SaudiMap extends HTMLElement {
 
     initChart() {
         const self = this;
-        this.map = Highcharts.mapChart(<HTMLElement>(this.querySelector('.map')), {
-            title: { text: 'Saudi Arabia' },
+        let text = 'Saudi Arabia';
+        if (this.selectedRegion) {
+            text += ` (${this.selectedRegion})`;
+            this.$button.classList.remove('hidden');
+        } else {
+            this.$button.classList.add('hidden');
+        }
+        this.map = Highcharts.mapChart(<HTMLElement>(this.$map), {
+            title: { text },
             series: (<any>this.makeSeries()),
 
             colorAxis: {
@@ -139,26 +146,29 @@ class SaudiMap extends HTMLElement {
         });
     }
 
-    showAllSeries() {
-        this.map.series.forEach((s) => s.show());
-    }
-
-    hideOtherSeries(region: string) {
-        this.map.series.forEach((s) => {
-            if (s.name !== region) {
-                s.hide();
-            }
-        });
-    }
-
     // --- template ---
+    get $table() {
+        return this.querySelector('.table');
+    }
+
+    get $map() {
+        return this.querySelector('.map');
+    }
+
+    get $button() {
+        return this.querySelector('.btn');
+    }
+
+    get $select() {
+        return this.querySelector('.select');
+    }
 
     clear() {
-        this.querySelector('.table').innerHTML = 'no data';
+        this.$table.innerHTML = 'no data';
     }
 
     render(found: TableRow) {
-        this.querySelector('.table').innerHTML = this.getTableRows(found);
+        this.$table.innerHTML = this.getTableRows(found);
     }
 
     getTableRows(found: TableRow) {
@@ -209,6 +219,9 @@ class SaudiMap extends HTMLElement {
                     right: 20px;
                     z-index: 1;
                 }
+                .hidden {
+                    display: none;
+                }
             </style>
             <div class="container">
                 <select class="select">
@@ -222,12 +235,12 @@ class SaudiMap extends HTMLElement {
     }
 
     events() {
-        this.querySelector('.select').addEventListener('change', (e: any) => {
+        this.$select.addEventListener('change', (e: any) => {
             this.filter = e.target.value;
             this.initChart();
         });
 
-        this.querySelector('.btn').addEventListener('click', (e: any) => {
+        this.$button.addEventListener('click', (e: any) => {
             this.selectedRegion = null;
             this.initChart();
         });
@@ -250,4 +263,4 @@ class SaudiMap extends HTMLElement {
     }
 }
 
-customElements.define('saudi-map', SaudiMap);
+window.customElements.define('saudi-map', SaudiMap);
