@@ -4,6 +4,7 @@ import data from '../data/output.json';
 import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
 import capitalize from 'lodash/capitalize';
+import pick from 'lodash/pick';
 import { TableRow, MapSerie, MapSerieItem, MapFilter } from './types';
 
 class SaudiMap extends HTMLElement {
@@ -19,7 +20,7 @@ class SaudiMap extends HTMLElement {
         super();
         this.data = data.concat(nodata);
         this.series = series;
-        this.filter = 'number_of_connections';
+        this.filter = this.options[0];
         this.selectedRegion = null;
     }
 
@@ -37,11 +38,17 @@ class SaudiMap extends HTMLElement {
     }
 
     makeSeries() {
-        return Object.keys(this.groupedData).map((region: string) => {
+
+        let data;
+        if (this.selectedRegion) {
+            data = pick(this.groupedData, this.selectedRegion);
+        } else {
+            data = this.groupedData;
+        }
+        return Object.keys(data).map((region: string) => {
             return 	{
                 type: 'map',
                 name: region,
-                joinBy: ['name', this.filter],
                 data: this.groupedData[region].map((d: TableRow) => {
                     const item = this.findInMap(d.governorate);
                     let value;
@@ -89,7 +96,7 @@ class SaudiMap extends HTMLElement {
         const self = this;
         this.map = Highcharts.mapChart(<HTMLElement>(this.querySelector('.map')), {
             title: { text: 'Saudi Arabia' },
-            series: (<any>this.groupedSeries),
+            series: (<any>this.makeSeries()),
 
             colorAxis: {
                 min: 0
@@ -123,10 +130,7 @@ class SaudiMap extends HTMLElement {
                                     self.clear();
                                 }
                                 self.selectedRegion = this.region;
-                                self.hideOtherSeries(this.region);
-                                self.updateMap();
-                                self.map.zoomOut();
-                                // self.map.mapZoom(0.7, self.map.xAxis[0].toValue(e.chartX), self.map.yAxis[0].toValue(e.y));
+                                self.initChart();
                             }
                         }
                     }
@@ -146,21 +150,6 @@ class SaudiMap extends HTMLElement {
             }
         });
     }
-
-    updateMap() {
-        this.map.update({
-            series: (<any>this.makeSeries()),
-            plotOptions: {
-                map: {
-                    tooltip: {
-                        headerFormat: '',
-                        pointFormat: this.selectedRegion ? '{point.name}' : '{point.region}'
-                    }
-                },
-            }
-        })
-    }
-    
 
     // --- template ---
 
@@ -182,7 +171,7 @@ class SaudiMap extends HTMLElement {
         }).join('');
     }
 
-    get options() {
+    get options(): Array<MapFilter> {
         return [
             'number_of_connections',
             'number_of_households',
@@ -235,13 +224,12 @@ class SaudiMap extends HTMLElement {
     events() {
         this.querySelector('.select').addEventListener('change', (e: any) => {
             this.filter = e.target.value;
-            this.updateMap();
+            this.initChart();
         });
 
         this.querySelector('.btn').addEventListener('click', (e: any) => {
             this.selectedRegion = null;
-            this.updateMap();
-            this.showAllSeries();
+            this.initChart();
         });
     }
 
@@ -251,25 +239,10 @@ class SaudiMap extends HTMLElement {
         return <number>(this.groupedData[region].find((item) => item.governorate === governorate)[filter]);
     }
 
-    /*
-    getGovernotateMaximumValue(filter: string, region: string): number {
-        const byGovernorates =  this.groupedData[region].map((item) => this.getGovernotateValue(filter, region, item.governorate));
-        const max = Math.max.apply(Math, byGovernorates);
-        console.log('max governorate', max);
-        return max;
-    }
-    */
 
     getRegionValue(filter: string, region: string): number {
         return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += <number>(curr[filter]), 0)
     }
-
-    /*
-    getRegionMaximumValue(filter: string): number {
-        const byRegions =  Object.keys(this.groupedData).map((region) => this.getRegionValue(filter, region));
-        return Math.max.apply(Math, byRegions);
-    }
-    */
 
     // -- utils --
     formatCode(c: string) {
