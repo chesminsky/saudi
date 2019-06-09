@@ -4,6 +4,7 @@ import data from '../data/output.json';
 import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
 import capitalize from 'lodash/capitalize';
+import pick from 'lodash/pick';
 import { TableRow, MapSerie, MapSerieItem, MapFilter } from './types';
 
 class SaudiMap extends HTMLElement {
@@ -20,7 +21,7 @@ class SaudiMap extends HTMLElement {
         this.data = data.concat(nodata);
         this.series = series;
         this.filter = 'number_of_connections';
-        this.selectedRegion = null;
+        this.selectedRegion = 'RIYADH';
     }
 
     connectedCallback() {
@@ -32,11 +33,12 @@ class SaudiMap extends HTMLElement {
             return 	{
                 type: 'map',
                 name: region,
-                // joinBy: ['name', 'value'],
+                joinBy: ['name', this.filter],
                 data: this.groupedData[region].map((d: TableRow) => {
                     const item = this.findInMap(d.governorate);
+                    const itemData = pick(this.findInTable(d.governorate), this.options);
                     if (item) {
-                        Object.assign(item, { region });
+                        Object.assign(item, { region, ...itemData });
                     }
                     return item;
                 }).filter((d) => Boolean(d))
@@ -83,11 +85,11 @@ class SaudiMap extends HTMLElement {
 
             // colors: this.getRegionColors(),
 
-            // colorAxis: {
-            //     min: 1,
-            //     max: 1000,
-            //     type: 'logarithmic'
-            // },
+            colorAxis: {
+                min: 0,
+                max: this.getGovernotateMaximumValue(this.filter, this.selectedRegion),
+                type: 'linear'
+            },
 
             chart: {
                 backgroundColor: '#fafafa'
@@ -209,10 +211,10 @@ class SaudiMap extends HTMLElement {
     }
 
     events() {
-        this.querySelector('.select').addEventListener('change', (e: any) => {
-            this.filter = e.target.value;
-            this.updateMap();
-        });
+        // this.querySelector('.select').addEventListener('change', (e: any) => {
+        //     this.filter = e.target.value;
+        //     this.updateMap();
+        // });
     }
 
     // --- colors calc ---
@@ -240,16 +242,18 @@ class SaudiMap extends HTMLElement {
     // --- data calculations ---
 
     getGovernotateValue(filter: string, region: string, governorate: string): number {
-        return this.parseNumber(this.groupedData[region].find((item) => item.governorate === governorate)[filter]);
+        return <number>(this.groupedData[region].find((item) => item.governorate === governorate)[filter]);
     }
 
     getGovernotateMaximumValue(filter: string, region: string): number {
         const byGovernorates =  this.groupedData[region].map((item) => this.getGovernotateValue(filter, region, item.governorate));
-        return Math.max.apply(Math, byGovernorates);
+        const max = Math.max.apply(Math, byGovernorates);
+        console.log('max governorate', max);
+        return max;
     }
 
     getRegionValue(filter: string, region: string): number {
-        return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += this.parseNumber(curr[filter]), 0)
+        return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += <number>(curr[filter]), 0)
     }
 
     getRegionMaximumValue(filter: string): number {
@@ -258,13 +262,6 @@ class SaudiMap extends HTMLElement {
     }
 
     // -- utils --
-    parseNumber(number: string) {
-        if (number === '' || number === '-') {
-            return 0;
-        }
-        return parseFloat(number.replace(/\W|_|,+/g, ''));
-    }
-
     formatCode(c: string) {
         return capitalize(c.replace(/_+/g, ' '));
     }

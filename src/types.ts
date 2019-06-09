@@ -2,17 +2,17 @@
     governorate: string;
     id_on_map: string;
     region: string;
-    [key: string]: string;
+    [key: string]: string | number;
 };
 
 export interface DataRow {
-    number_of_connections?: string;
-    number_of_households?: string;
-    number_of_people?: string;
-    population_off_grid?: string;
-    population_supplied_with_standpipes_within_administrative_area?: string;
-    population_supplied_with_tankers_within_administrative_area?: string;
-    population_with_alternate_means_of_service?: string;
+    number_of_connections?: number;
+    number_of_households?: number;
+    number_of_people?: number;
+    population_off_grid?: number;
+    population_supplied_with_standpipes_within_administrative_area?: number;
+    population_supplied_with_tankers_within_administrative_area?: number;
+    population_with_alternate_means_of_service?: number;
 }
 
 export interface MapSerie {
