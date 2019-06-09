@@ -198,20 +198,26 @@ class SaudiMap extends HTMLElement {
 
         return `
             <style>
-                .map {
+                saudi-map .map {
                     height:600px;
                 }
-                .container {   
+                saudi-map .container {   
                     position: relative;
                 }
-                .table {
+                saudi-map .table {
                     table-layout: fixed;
                 }
-                .select {
+                saudi-map .select {
                     position: absolute;
                     top: 6px;
                     width: 300px;
                     left: 20px;
+                    z-index: 1;
+                }
+                saudi-map .btn {
+                    position: absolute;
+                    top: 6px;
+                    right: 20px;
                     z-index: 1;
                 }
             </style>
@@ -219,6 +225,7 @@ class SaudiMap extends HTMLElement {
                 <select class="select">
                     ${ this.options.map((o) => `<option value="${o}">${this.formatCode(o)}</option>`) }
                 </select>
+                <button class="btn btn-primary">Zoom out</button>
                 <div class="map"></div>
                 <table class="table"></table>
             </div>
@@ -228,6 +235,12 @@ class SaudiMap extends HTMLElement {
     events() {
         this.querySelector('.select').addEventListener('change', (e: any) => {
             this.filter = e.target.value;
+            this.updateMap();
+        });
+
+        this.querySelector('.btn').addEventListener('click', (e: any) => {
+            this.selectedRegion = null;
+            this.showAllSeries();
             this.updateMap();
         });
     }
