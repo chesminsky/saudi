@@ -4,7 +4,6 @@ import data from '../data/output.json';
 import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
 import capitalize from 'lodash/capitalize';
-import pick from 'lodash/pick';
 import { TableRow, MapSerie, MapSerieItem, MapFilter } from './types';
 
 class SaudiMap extends HTMLElement {
@@ -123,7 +122,10 @@ class SaudiMap extends HTMLElement {
                                 } else {
                                     self.clear();
                                 }
+                                self.selectedRegion = this.region;
                                 self.hideOtherSeries(this.region);
+                                self.updateMap();
+                                self.map.zoomOut();
                                 // self.map.mapZoom(0.7, self.map.xAxis[0].toValue(e.chartX), self.map.yAxis[0].toValue(e.y));
                             }
                         }
@@ -147,7 +149,15 @@ class SaudiMap extends HTMLElement {
 
     updateMap() {
         this.map.update({
-            series: (<any>this.makeSeries())
+            series: (<any>this.makeSeries()),
+            plotOptions: {
+                map: {
+                    tooltip: {
+                        headerFormat: '',
+                        pointFormat: this.selectedRegion ? '{point.name}' : '{point.region}'
+                    }
+                },
+            }
         })
     }
     
@@ -222,28 +232,6 @@ class SaudiMap extends HTMLElement {
         });
     }
 
-    // --- colors calc ---
-/*
-    getRegionColors() {
-        return Object.keys(this.groupedData).map((region) => {
-            const value = this.getRegionValue(this.filter, region);
-            const maxValue = this.getRegionMaximumValue(this.filter);
-            console.log(value);
-            console.log(maxValue);
-            return `rgba(100,149,237, ${ value/maxValue })`;
-        });
-    }
-
-    getGovernorateColors() {
-        return this.groupedData[this.selectedRegion].map((item) => {
-            const value = this.getGovernotateValue(this.filter, this.selectedRegion, item.governorate);
-            const maxValue = this.getGovernotateMaximumValue(this.filter, this.selectedRegion);
-            console.log(value);
-            console.log(maxValue);
-            return `rgba(100,149,237, ${ value/maxValue })`;
-        });
-    }
-*/
     // --- data calculations ---
 
     getGovernotateValue(filter: string, region: string, governorate: string): number {
