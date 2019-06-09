@@ -240,8 +240,8 @@ class SaudiMap extends HTMLElement {
 
         this.querySelector('.btn').addEventListener('click', (e: any) => {
             this.selectedRegion = null;
-            this.showAllSeries();
             this.updateMap();
+            this.showAllSeries();
         });
     }
 
