@@ -4,53 +4,19 @@ import data from '../data/output.json';
 import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
 import capitalize from 'lodash/capitalize';
-
-interface DataRow {
-    governorate: string;
-    id_on_map: string;
-    number_of_connections: string;
-    number_of_households: string;
-    number_of_people: string;
-    population_off_grid: string;
-    population_supplied_with_standpipes_within_administrative_area: string;
-    population_supplied_with_tankers_within_administrative_area: string;
-    population_with_alternate_means_of_service: string;
-    region: string;
-    [key: string]: string;
-};
-
-interface MapSerie {
-    type: string;
-    data: Array<MapSerieItem>;
-    name?: string;
-    joinBy?: string[];
-}
-
-interface MapSerieItem {
-    name: string;
-    path: string;
-    region?: string;
-}
+import { TableRow, MapSerie, MapSerieItem, MapFilter } from './types';
 
 class SaudiMap extends HTMLElement {
     map: Highcharts.Chart;
-    data: Array<DataRow>;
+    data: Array<TableRow>;
     series: Array<MapSerie>;
-    groupedData: { [key: string]: Array<DataRow>}
+    groupedData: { [key: string]: Array<TableRow>}
     groupedSeries: Array<MapSerie>;
-    mode: 'region' | 'governorate';
     selectedRegion: string;
-    filter: 'number_of_connections' |
-            'number_of_households' |
-            'number_of_people' |
-            'population_off_grid' |
-            'population_supplied_with_standpipes_within_administrative_area' |
-            'population_supplied_with_tankers_within_administrative_area' |
-            'population_with_alternate_means_of_service'
+    filter: MapFilter
 
     constructor() {
         super();
-        this.mode = 'region';
         this.data = data.concat(nodata);
         this.series = series;
         this.filter = 'number_of_connections';
@@ -67,7 +33,7 @@ class SaudiMap extends HTMLElement {
                 type: 'map',
                 name: region,
                 // joinBy: ['name', 'value'],
-                data: this.groupedData[region].map((d: DataRow) => {
+                data: this.groupedData[region].map((d: TableRow) => {
                     const item = this.findInMap(d.governorate);
                     if (item) {
                         Object.assign(item, { region });
@@ -85,7 +51,7 @@ class SaudiMap extends HTMLElement {
 
     /**
      * Поиск по карте
-     * @param name - имя из таблице
+     * @param name - имя из таблицы
      */
     findInMap(name: string): MapSerieItem {
         return this.series[0].data.find((item: MapSerieItem) => {
@@ -100,8 +66,8 @@ class SaudiMap extends HTMLElement {
      * Поиск по таблице
      * @param name - имя из карты
      */
-    findInTable(name: string): DataRow {
-        return this.data.find((item: DataRow) => {
+    findInTable(name: string): TableRow {
+        return this.data.find((item: TableRow) => {
             const regex = /\W|_+/g
             const dataName = item.governorate.replace(regex, '');
             const mapName = name.replace(regex, '');
@@ -130,7 +96,7 @@ class SaudiMap extends HTMLElement {
                 map: {
                     tooltip: {
                         headerFormat: '',
-                        pointFormat: this.mode === 'region' ? '{point.region}' : '{point.name}'
+                        pointFormat: this.selectedRegion ? '{point.name}' : '{point.region}'
                     }
                 },
                 series: { 
@@ -172,15 +138,24 @@ class SaudiMap extends HTMLElement {
         });
     }
 
+    updateMap() {
+        this.map.update({
+            colors: this.getRegionColors()
+        })
+    }
+    
+
+    // --- template ---
+
     clear() {
         this.querySelector('.table').innerHTML = 'no data';
     }
 
-    render(found: DataRow) {
+    render(found: TableRow) {
         this.querySelector('.table').innerHTML = this.getTableRows(found);
     }
 
-    getTableRows(found: DataRow) {
+    getTableRows(found: TableRow) {
         return Object.keys(found).map((key: string) => {
             if (key !== 'id_on_map') {
                 return `<tr><td>${this.formatCode(key)}</td><td>${found[key]}</td></tr>`
@@ -240,13 +215,7 @@ class SaudiMap extends HTMLElement {
         });
     }
 
-    updateMap() {
-        this.map.update({
-            colors: this.getRegionColors()
-        })
-    }
-
-    // colors calc
+    // --- colors calc ---
 
     getRegionColors() {
         return Object.keys(this.groupedData).map((region) => {
@@ -270,21 +239,21 @@ class SaudiMap extends HTMLElement {
 
     // --- data calculations ---
 
-    getGovernotateValue(param: string, region: string, governorate: string): number {
-        return this.parseNumber(this.groupedData[region].find((item) => item.governorate === governorate)[param]);
+    getGovernotateValue(filter: string, region: string, governorate: string): number {
+        return this.parseNumber(this.groupedData[region].find((item) => item.governorate === governorate)[filter]);
     }
 
-    getGovernotateMaximumValue(param: string, region: string): number {
-        const byGovernorates =  this.groupedData[region].map((item) => this.getGovernotateValue(param, region, item.governorate));
+    getGovernotateMaximumValue(filter: string, region: string): number {
+        const byGovernorates =  this.groupedData[region].map((item) => this.getGovernotateValue(filter, region, item.governorate));
         return Math.max.apply(Math, byGovernorates);
     }
 
-    getRegionValue(param: string, region: string): number {
-        return this.groupedData[region].reduce((acc: number, curr: DataRow) => acc += this.parseNumber(curr[param]), 0)
+    getRegionValue(filter: string, region: string): number {
+        return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += this.parseNumber(curr[filter]), 0)
     }
 
-    getRegionMaximumValue(param: string): number {
-        const byRegions =  Object.keys(this.groupedData).map((region) => this.getRegionValue(param, region));
+    getRegionMaximumValue(filter: string): number {
+        const byRegions =  Object.keys(this.groupedData).map((region) => this.getRegionValue(filter, region));
         return Math.max.apply(Math, byRegions);
     }
 
