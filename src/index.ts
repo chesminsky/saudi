@@ -100,6 +100,7 @@ class SaudiMap extends HTMLElement {
             this.$button.classList.remove('hidden');
         } else {
             this.$button.classList.add('hidden');
+            this.renderSummaryTable();
         }
         this.map = Highcharts.mapChart(<HTMLElement>(this.$map), {
             title: { text },
@@ -132,9 +133,9 @@ class SaudiMap extends HTMLElement {
                                 const found = self.findInTable(this.name);
 
                                 if (found) {
-                                    self.render(found);
+                                    self.renderTable(found);
                                 } else {
-                                    self.clear();
+                                    self.clearTable();
                                 }
                                 self.selectedRegion = this.region;
                                 self.initChart();
@@ -163,12 +164,16 @@ class SaudiMap extends HTMLElement {
         return this.querySelector('.select');
     }
 
-    clear() {
+    clearTable() {
         this.$table.innerHTML = 'no data';
     }
 
-    render(found: TableRow) {
+    renderTable(found: TableRow) {
         this.$table.innerHTML = this.getTableRows(found);
+    }
+
+    renderSummaryTable() {
+        this.$table.innerHTML = this.getTableRowsSummary();
     }
 
     getTableRows(found: TableRow) {
@@ -178,6 +183,16 @@ class SaudiMap extends HTMLElement {
             } else {
                 return '';
             }
+        }).join('');
+    }
+
+    getTableRowsSummary() {
+        const data = [['Region', this.formatCode(this.filter)]];
+        Object.keys(this.groupedData).forEach((key) => {
+            data.push([key, String(this.getRegionValue(this.filter, key))])
+        });
+        return data.map((r) => {
+            return `<tr>${r.map(td => `<td>${td}</td>`).join('')}</tr>`;
         }).join('');
     }
 
@@ -206,17 +221,17 @@ class SaudiMap extends HTMLElement {
                 saudi-map .table {
                     table-layout: fixed;
                 }
-                saudi-map .select {
+                saudi-map .form-group{
                     position: absolute;
                     top: 6px;
                     width: 300px;
-                    left: 20px;
+                    left: 33px;
                     z-index: 1;
                 }
                 saudi-map .btn {
                     position: absolute;
-                    top: 6px;
-                    right: 20px;
+                    top: 33px;
+                    right: 33px;
                     z-index: 1;
                 }
                 .hidden {
@@ -224,9 +239,12 @@ class SaudiMap extends HTMLElement {
                 }
             </style>
             <div class="container">
-                <select class="select">
-                    ${ this.options.map((o) => `<option value="${o}">${this.formatCode(o)}</option>`) }
-                </select>
+                <div class="form-group">
+                    <label>Choose indicator</label>
+                    <select class="select form-control">
+                        ${ this.options.map((o) => `<option value="${o}">${this.formatCode(o)}</option>`) }
+                    </select>
+                </div>
                 <button class="btn btn-primary">Zoom out</button>
                 <div class="map"></div>
                 <table class="table"></table>
@@ -248,17 +266,17 @@ class SaudiMap extends HTMLElement {
 
     // --- data calculations ---
 
-    getGovernotateValue(filter: string, region: string, governorate: string): number {
+    getGovernotateValue(filter: MapFilter, region: string, governorate: string): number {
         return <number>(this.groupedData[region].find((item) => item.governorate === governorate)[filter]);
     }
 
 
-    getRegionValue(filter: string, region: string): number {
+    getRegionValue(filter: MapFilter, region: string): number {
         return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += <number>(curr[filter]), 0)
     }
 
     // -- utils --
-    formatCode(c: string) {
+    formatCode(c: string): string {
         return capitalize(c.replace(/_+/g, ' '));
     }
 }

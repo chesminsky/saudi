@@ -8,6 +8,10 @@
       "allowJs": true,
       "resolveJsonModule": true,
       "esModuleInterop": true,
-      "moduleResolution": "node"
+      "moduleResolution": "node",
+      "lib": [
+        "dom",
+        "es7"
+     ]
     }
   }
