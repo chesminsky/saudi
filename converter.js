@@ -1,11 +1,13 @@
 const xlsxj = require('xlsx-to-json');
 const fs = require('fs');
-const dataColumns = require('./config.json').columns;
+const config = require('./config.json');
+const dataColumns = config.columns;
+const sheet = config.sheet;
 
 xlsxj({
     input: './files/saudi.xlsx',
     output: null,
-    sheet: 'Coverage I'
+    sheet
 }, function (err, result) {
     if (err) {
         console.error(err);
