@@ -17,10 +17,12 @@ class SaudiMap extends HTMLElement {
     selectedRegion: string;
     filter: string;
     columns: string[];
+    columnsConfig: Array<{ name: string, calc: string }>;
 
     constructor() {
         super();
-        this.columns = config.columns.map((c) => c.toLowerCase());
+        this.columnsConfig = config.columns;
+        this.columns = this.columnsConfig.map((c) => c.name.toLowerCase());
         const noDataWithMock: Array<TableRow> = nodata.map((item) => {
             this.columns.forEach((c) => {
                 (<TableRow>item)[c] = 0;
@@ -198,7 +200,7 @@ class SaudiMap extends HTMLElement {
     getTableRowsSummary() {
         const data = [['Region', this.formatCode(this.filter)]];
         Object.keys(this.groupedData).forEach((key) => {
-            data.push([key, String(this.getRegionValue(key))])
+            data.push([key, String(this.getRegionValue(key).toFixed(0))])
         });
         return data.map((r) => {
             return `<tr>${r.map(td => `<td>${td}</td>`).join('')}</tr>`;
@@ -267,9 +269,14 @@ class SaudiMap extends HTMLElement {
         return <number>(this.groupedData[region].find((item) => item.governorate === governorate)[this.filter]);
     }
 
-
     getRegionValue(region: string): number {
-        return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += <number>(curr[this.filter]), 0)
+        const calc = this.columnsConfig.find((cc) => cc.name.toLowerCase() === this.filter).calc;
+        const sum = this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += <number>(curr[this.filter]), 0);
+        if (calc === 'summary') {
+            return sum;
+        } else if (calc === 'average') {
+            return sum / this.groupedData[region].length;
+        }
     }
 
     // -- utils --

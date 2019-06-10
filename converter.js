@@ -1,7 +1,7 @@
 const xlsxj = require('xlsx-to-json');
 const fs = require('fs');
 const config = require('./config.json');
-const dataColumns = config.columns;
+const dataColumns = config.columns.map((c) => c.name);
 const sheet = config.sheet;
 
 xlsxj({

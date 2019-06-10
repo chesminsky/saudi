@@ -1,6 +1,37 @@
 {
     "sheet": "Data",
     "columns": [
-        "Service coverage, %"
+        {
+            "name": "Service coverage, %",
+            "calc": "average"
+        },
+        {
+            "name": "Service coverage with water connection, %",
+            "calc": "average"
+        },
+        {
+            "name": "Service coverage with Tankers %",
+            "calc": "average"
+        },
+        {
+            "name": "Service coverage with StandPipes %",
+            "calc": "average"
+        },
+        {
+            "name": "Wastewater coverage with direct connections",
+            "calc": "average"
+        },
+        {
+            "name": "Wastewater coverage with latrines",
+            "calc": "average"
+        },
+        {
+            "name": "Total coverage with in-doors plumbing",
+            "calc": "average"
+        },
+        {
+            "name": "Hours of uninterrupted water supply",
+            "calc": "average"
+        }
     ]
 }
