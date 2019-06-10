@@ -1,0 +1,11 @@
+{
+    "columns": [
+        "number_of_connections",
+        "number_of_households",
+        "number_of_people",
+        "population_off_grid",
+        "population_supplied_with_standpipes_within_administrative_area",
+        "population_supplied_with_tankers_within_administrative_area",
+        "population_with_alternate_means_of_service"
+    ]
+}

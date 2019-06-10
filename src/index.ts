@@ -5,6 +5,7 @@ import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
 import capitalize from 'lodash/capitalize';
 import pick from 'lodash/pick';
+import config from '../config.json';
 import { TableRow, MapSerie, MapSerieItem } from './types';
 
 class SaudiMap extends HTMLElement {
@@ -15,12 +16,14 @@ class SaudiMap extends HTMLElement {
     groupedSeries: Array<MapSerie>;
     selectedRegion: string;
     filter: string;
+    columns: string[];
 
     constructor() {
         super();
+        this.columns = config.columns;
         this.data = data.concat(nodata);
         this.series = series;
-        this.filter = this.options[0];
+        this.filter = this.columns[0];
         this.selectedRegion = null;
     }
 
@@ -196,18 +199,6 @@ class SaudiMap extends HTMLElement {
         }).join('');
     }
 
-    get options(): Array<string> {
-        return [
-            'number_of_connections',
-            'number_of_households',
-            'number_of_people',
-            'population_off_grid',
-            'population_supplied_with_standpipes_within_administrative_area',
-            'population_supplied_with_tankers_within_administrative_area',
-            'population_with_alternate_means_of_service'
-        ]
-    }
-
     get template() {
 
         return `
@@ -242,7 +233,7 @@ class SaudiMap extends HTMLElement {
                 <div class="form-group">
                     <label>Choose indicator</label>
                     <select class="select form-control">
-                        ${ this.options.map((o) => `<option value="${o}">${this.formatCode(o)}</option>`) }
+                        ${ this.columns.map((c) => `<option value="${c}">${this.formatCode(c)}</option>`) }
                     </select>
                 </div>
                 <button class="btn btn-primary">Zoom out</button>

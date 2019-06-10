@@ -1,5 +1,6 @@
 const xlsxj = require('xlsx-to-json');
 const fs = require('fs');
+const dataColumns = require('./config.json').columns;
 
 xlsxj({
     input: './files/saudi.xlsx',
@@ -19,7 +20,7 @@ xlsxj({
 
 function parseToNumbers(data) {
     return data.map((dataRow) => {
-        dataKeys.forEach((key) => dataRow[key] = parseNumber(dataRow[key]));
+        dataColumns.forEach((key) => dataRow[key] = parseNumber(dataRow[key]));
         return dataRow;
     });
 }
@@ -30,13 +31,3 @@ function parseNumber(number) {
     }
     return parseFloat(number.replace(/\W|_|,+/g, ''));
 }
-
-const dataKeys = [
-    'number_of_connections',
-    'number_of_households',
-    'number_of_people',
-    'population_off_grid',
-    'population_supplied_with_standpipes_within_administrative_area',
-    'population_supplied_with_tankers_within_administrative_area',
-    'population_with_alternate_means_of_service'
-];
