@@ -15,11 +15,13 @@ xlsxj({
         if (!fs.existsSync('./data')){
             fs.mkdirSync('./data');
         }
-        result = result.filter((item) => Boolean(item['Governorate']));
+        const allKeys = dataColumns.concat(['Region', 'Governorate']);
+        result = result.filter((item) => Boolean(item['Region']) && Boolean(item['Governorate']));
         result = parseToNumbers(result);
         result = result.map((item) => {
             const lowered = {};
             Object.keys(item).forEach((key) => {
+                if (allKeys.includes(key))
                 lowered[key.toLowerCase()] = item[key];
             });
             return lowered;

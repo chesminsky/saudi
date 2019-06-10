@@ -1,6 +1,5 @@
  export interface TableRow {
     governorate: string;
-    id_on_map: string;
     region: string;
     [key: string]: string | number;
 };

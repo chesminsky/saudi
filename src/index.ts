@@ -21,7 +21,13 @@ class SaudiMap extends HTMLElement {
     constructor() {
         super();
         this.columns = config.columns.map((c) => c.toLowerCase());
-        this.data = data.concat(nodata);
+        const noDataWithMock: Array<TableRow> = nodata.map((item) => {
+            this.columns.forEach((c) => {
+                (<TableRow>item)[c] = 0;
+            });
+            return item;
+        });
+        this.data = (<Array<TableRow>>data).concat(noDataWithMock);
         this.series = series;
         this.filter = this.columns[0];
         this.selectedRegion = null;
