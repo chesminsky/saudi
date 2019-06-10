@@ -20,7 +20,7 @@ class SaudiMap extends HTMLElement {
 
     constructor() {
         super();
-        this.columns = config.columns;
+        this.columns = config.columns.map((c) => c.toLowerCase());
         this.data = data.concat(nodata);
         this.series = series;
         this.filter = this.columns[0];

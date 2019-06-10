@@ -12,11 +12,19 @@ xlsxj({
     if (err) {
         console.error(err);
     } else {
-        result = result.filter((item) => Boolean(item['id_on_map']));
         if (!fs.existsSync('./data')){
             fs.mkdirSync('./data');
         }
-        fs.writeFileSync('./data/output.json', JSON.stringify(parseToNumbers(result)));
+        result = result.filter((item) => Boolean(item['Governorate']));
+        result = parseToNumbers(result);
+        result = result.map((item) => {
+            const lowered = {};
+            Object.keys(item).forEach((key) => {
+                lowered[key.toLowerCase()] = item[key];
+            });
+            return lowered;
+        });
+        fs.writeFileSync('./data/output.json', JSON.stringify(result));
     }
 });
 
@@ -28,7 +36,7 @@ function parseToNumbers(data) {
 }
 
 function parseNumber(number) {
-    if (number === '' || number === '-' || number === '0') {
+    if (!number || number === '-' || number === '0') {
         return 0;
     }
     return parseFloat(number.replace(/\W|_|,+/g, ''));
