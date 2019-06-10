@@ -5,7 +5,7 @@ import nodata from './no-data.json';
 import groupBy from 'lodash/groupBy';
 import capitalize from 'lodash/capitalize';
 import pick from 'lodash/pick';
-import { TableRow, MapSerie, MapSerieItem, MapFilter } from './types';
+import { TableRow, MapSerie, MapSerieItem } from './types';
 
 class SaudiMap extends HTMLElement {
     map: Highcharts.Chart;
@@ -14,7 +14,7 @@ class SaudiMap extends HTMLElement {
     groupedData: { [key: string]: Array<TableRow>}
     groupedSeries: Array<MapSerie>;
     selectedRegion: string;
-    filter: MapFilter
+    filter: string;
 
     constructor() {
         super();
@@ -53,9 +53,9 @@ class SaudiMap extends HTMLElement {
                     const item = this.findInMap(d.governorate);
                     let value;
                     if (!this.selectedRegion) {
-                        value = this.getRegionValue(this.filter, region);
+                        value = this.getRegionValue(region);
                     } else {
-                        value = this.getGovernotateValue(this.filter, region, d.governorate);
+                        value = this.getGovernotateValue(region, d.governorate);
                     }
                     if (item) {
                         Object.assign(item, { region, value });
@@ -189,14 +189,14 @@ class SaudiMap extends HTMLElement {
     getTableRowsSummary() {
         const data = [['Region', this.formatCode(this.filter)]];
         Object.keys(this.groupedData).forEach((key) => {
-            data.push([key, String(this.getRegionValue(this.filter, key))])
+            data.push([key, String(this.getRegionValue(key))])
         });
         return data.map((r) => {
             return `<tr>${r.map(td => `<td>${td}</td>`).join('')}</tr>`;
         }).join('');
     }
 
-    get options(): Array<MapFilter> {
+    get options(): Array<string> {
         return [
             'number_of_connections',
             'number_of_households',
@@ -266,13 +266,13 @@ class SaudiMap extends HTMLElement {
 
     // --- data calculations ---
 
-    getGovernotateValue(filter: MapFilter, region: string, governorate: string): number {
-        return <number>(this.groupedData[region].find((item) => item.governorate === governorate)[filter]);
+    getGovernotateValue(region: string, governorate: string): number {
+        return <number>(this.groupedData[region].find((item) => item.governorate === governorate)[this.filter]);
     }
 
 
-    getRegionValue(filter: MapFilter, region: string): number {
-        return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += <number>(curr[filter]), 0)
+    getRegionValue(region: string): number {
+        return this.groupedData[region].reduce((acc: number, curr: TableRow) => acc += <number>(curr[this.filter]), 0)
     }
 
     // -- utils --
