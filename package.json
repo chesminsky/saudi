@@ -12,7 +12,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.134",
     "highcharts": "^7.1.2",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "xlsx-to-json": "^0.3.0"
   },
   "devDependencies": {
