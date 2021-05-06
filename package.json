@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@types/lodash": "^4.14.134",
-    "highcharts": "^7.1.2",
+    "highcharts": "^9.0.0",
     "lodash": "^4.17.13",
     "xlsx-to-json": "^0.3.0"
   },
